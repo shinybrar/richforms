@@ -1,2 +1,3 @@
-# richforms
-Rich CLI Forms based on Pydantic Models
+# Rich Forms
+
+Rich CLI based Forms from Pydantic Models.

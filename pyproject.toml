@@ -1,0 +1,20 @@
+[project]
+name = "richforms"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Shiny Brar", email = "shiny.brar@nrc-cnrc.gc.ca" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0",
+    "rich>=14.0",
+]
+
+[project.scripts]
+richforms = "richforms:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
