@@ -9,7 +9,6 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "click>=8.3.1",
-    "library",
     "pydantic>=2.0",
     "pyyaml>=6.0.3",
     "rich>=14.0",
@@ -43,6 +42,3 @@ select = ["E", "F", "I", "B", "UP", "N", "SIM", "C4"]
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
-
-[tool.uv.sources]
-library = { path = "../canfar-library" }
