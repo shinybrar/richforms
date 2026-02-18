@@ -12,7 +12,10 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@v4
+      - uses: googleapis/release-please-action@v4
         with:
+          # If repository settings block PR creation by GitHub Actions,
+          # set RELEASE_PLEASE_TOKEN to a PAT with repo access.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           config-file: .release-please-config.json
           manifest-file: .release-please-manifest.json
