@@ -1,0 +1,40 @@
+[project]
+site_name = "richforms"
+site_description = "Rich terminal forms generated from Pydantic models."
+site_author = "richforms contributors"
+copyright = "Copyright © 2026 richforms contributors"
+nav = [
+  { "Overview" = "index.md" },
+  { "User" = [
+    { "Getting Started" = "getting-started.md" },
+    { "CLI Guide" = "cli.md" },
+  ]},
+  { "API" = [
+    { "Python API" = "python-api.md" },
+    { "Integrations" = "integrations.md" },
+  ]},
+  { "Contributor" = [
+    { "Contributing" = "contributing.md" },
+    { "Releasing" = "releasing.md" },
+  ]},
+]
+
+[project.theme]
+language = "en"
+features = [
+  "announce.dismiss",
+  "content.code.copy",
+  "navigation.footer",
+  "navigation.indexes",
+  "navigation.path",
+  "navigation.sections",
+  "navigation.top",
+  "search.highlight",
+]
+
+[[project.theme.palette]]
+scheme = "default"
+primary = "teal"
+accent = "blue"
+toggle.icon = "lucide/terminal-square"
+toggle.name = "Terminal palette"
