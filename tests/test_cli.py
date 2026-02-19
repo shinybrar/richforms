@@ -76,3 +76,21 @@ def test_fill_interrupt_shows_resume_hint_and_exits(tmp_path: Path, monkeypatch)
     assert result.exit_code == 130
     assert "--from-file" in result.output
     assert ".richforms-drafts" in result.output
+
+
+def test_fill_help_lists_clear_options() -> None:
+    result = runner.invoke(app, ["fill", "--help"])
+
+    assert result.exit_code == 0
+    assert "--clear" in result.output
+    assert "--no-clear" in result.output
+    assert "--live" not in result.output
+
+
+def test_edit_help_lists_clear_options() -> None:
+    result = runner.invoke(app, ["edit", "--help"])
+
+    assert result.exit_code == 0
+    assert "--clear" in result.output
+    assert "--no-clear" in result.output
+    assert "--live" not in result.output

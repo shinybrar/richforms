@@ -1,9 +1,11 @@
+import warnings
 from pathlib import Path
 
 import pytest
 from pydantic import BaseModel, Field
 
-from richforms.api import collect_model
+from richforms import edit, fill
+from richforms.api import collect_model, edit_model
 from richforms.config import FormConfig
 from tests.helpers import ScriptedInteraction
 from tests.models import Manifest
@@ -31,7 +33,7 @@ def test_collect_model_supports_default_enter() -> None:
     )
     config = FormConfig(interaction=interaction)
 
-    model = collect_model(SimpleModel, config=config)
+    model = fill(SimpleModel, config=config)
 
     assert model.name == "Image"
     assert model.source == "https://example.com/repo"
@@ -50,7 +52,7 @@ def test_collect_model_reprompts_only_invalid_field_after_validation() -> None:
     )
     config = FormConfig(interaction=interaction)
 
-    model = collect_model(SimpleModel, config=config)
+    model = fill(SimpleModel, config=config)
 
     assert model.source == "https://example.com/repo"
     prompts = "\n".join(interaction.prompts)
@@ -72,7 +74,7 @@ def test_collect_model_list_of_models_collects_nested_fields() -> None:
     )
     config = FormConfig(interaction=interaction)
 
-    model = collect_model(Manifest, config=config)
+    model = fill(Manifest, config=config)
 
     assert model.version == 1
     assert len(model.maintainers) == 1
@@ -95,7 +97,7 @@ def test_collect_model_interrupt_prompts_to_save_draft_and_reraises(tmp_path: Pa
     )
 
     with pytest.raises(KeyboardInterrupt):
-        collect_model(InterruptModel, config=config)
+        fill(InterruptModel, config=config)
 
     saved = list(tmp_path.glob("interruptmodel-*.yaml"))
     assert len(saved) == 1
@@ -115,7 +117,50 @@ def test_collect_model_interrupt_decline_save_writes_no_file(tmp_path: Path) -> 
     )
 
     with pytest.raises(KeyboardInterrupt):
-        collect_model(InterruptModel, config=config)
+        fill(InterruptModel, config=config)
 
     saved = list(tmp_path.glob("interruptmodel-*.yaml"))
     assert saved == []
+
+
+def test_edit_updates_existing_model_values() -> None:
+    interaction = ScriptedInteraction(responses=["New Name", "", ""], confirmations=[True])
+    config = FormConfig(interaction=interaction)
+    instance = SimpleModel(name="Old Name", source="https://example.com/repo")
+
+    model = edit(instance, config=config)
+
+    assert model.name == "New Name"
+    assert model.source == "https://example.com/repo"
+
+
+def test_collect_model_alias_emits_deprecation_warning() -> None:
+    interaction = ScriptedInteraction(
+        responses=[
+            "Image",
+            "https://example.com/repo",
+            "",
+        ],
+        confirmations=[True],
+    )
+    config = FormConfig(interaction=interaction)
+
+    with warnings.catch_warnings(record=True) as records:
+        warnings.simplefilter("always", DeprecationWarning)
+        model = collect_model(SimpleModel, config=config)
+
+    assert model.name == "Image"
+    assert any(item.category is DeprecationWarning for item in records)
+
+
+def test_edit_model_alias_emits_deprecation_warning() -> None:
+    interaction = ScriptedInteraction(responses=["Updated", "", ""], confirmations=[True])
+    config = FormConfig(interaction=interaction)
+    instance = SimpleModel(name="Old Name", source="https://example.com/repo")
+
+    with warnings.catch_warnings(record=True) as records:
+        warnings.simplefilter("always", DeprecationWarning)
+        model = edit_model(instance, config=config)
+
+    assert model.name == "Updated"
+    assert any(item.category is DeprecationWarning for item in records)

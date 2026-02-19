@@ -71,7 +71,10 @@ def _prompt_for_list(
         )
 
     if has_default:
-        decision = interaction.ask(f"{prompt_path} (type 'edit' to change list)", default="")
+        decision = interaction.ask(
+            f"{prompt_path} (Enter to keep, any key to edit)",
+            default="",
+        )
         if decision == "":
             return list(default_value)
 
@@ -88,7 +91,8 @@ def _prompt_for_list(
         try:
             values.append(item_adapter.validate_python(raw))
         except ValidationError as exc:
-            console.print(f"[red]Invalid value for {prompt_path}: {exc.errors()[0]['msg']}[/red]")
+            message = f"Invalid value for {prompt_path}: {exc.errors()[0]['msg']}"
+            console.print(f"[red]{message}[/red]")
             continue
         if not interaction.confirm(f"Add another item for {prompt_path}?", default=False):
             break
@@ -120,14 +124,14 @@ def _prompt_for_model_list(
             break
         collect_first = False
         console.print(f"[cyan]Collecting {prompt_path} item #{item_number}[/cyan]")
-        from richforms.api import collect_model
+        from richforms.api import fill
 
         child_config = FormConfig(
             interaction=interaction,
             console=console,
             confirm_before_return=False,
         )
-        item = collect_model(
+        item = fill(
             item_model,
             config=child_config,
             console=console,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from collections.abc import Iterable
 from typing import Any, TypeVar, cast
 
@@ -11,8 +12,7 @@ from richforms.drafts import build_draft_path, save_draft_yaml
 from richforms.introspection import build_model_schema
 from richforms.prompts import prompt_for_value
 from richforms.render import (
-    render_field_card,
-    render_path_radar,
+    render_editor_view,
     render_review,
     render_validation_ledger,
 )
@@ -29,7 +29,7 @@ from richforms.validate import validate_draft
 T = TypeVar("T", bound=BaseModel)
 
 
-def collect_model(
+def fill(
     model_type: type[T],
     *,
     initial: dict[str, Any] | None = None,
@@ -40,7 +40,7 @@ def collect_model(
 ) -> T:
     cfg = config or FormConfig()
     resolved_console = console or cfg.console or Console()
-    interaction = cfg.interaction or RichInteraction(resolved_console)
+    interaction: Interaction = cfg.interaction or RichInteraction(resolved_console)
     schema = build_model_schema(model_type)
     draft = copy_initial(initial)
     first_pass = True
@@ -52,28 +52,25 @@ def collect_model(
             for index, node in enumerate(targets, start=1):
                 current_value, has_default = _resolve_default(node=node, draft=draft)
                 display_path = _display_path(node.path, _path_prefix)
-                resolved_console.print(
-                    render_path_radar(
-                        schema.leaf_nodes,
-                        current_path=display_path,
-                        path_prefix=_path_prefix,
-                        completed_paths=set(
-                            _prefixed_paths(_completed_paths(schema, draft), _path_prefix)
-                        ),
-                        error_paths=set(_prefixed_paths(errors.keys(), _path_prefix)),
-                    )
+                if cfg.clear_on_step and resolved_console.is_terminal:
+                    resolved_console.clear()
+                cockpit = render_editor_view(
+                    nodes=schema.leaf_nodes,
+                    node=node,
+                    index=index,
+                    total=len(targets),
+                    current_path=display_path,
+                    error=errors.get(node.path),
+                    has_default=has_default,
+                    default_value=current_value,
+                    path_prefix=_path_prefix,
+                    completed_paths=set(
+                        _prefixed_paths(_completed_paths(schema, draft), _path_prefix)
+                    ),
+                    error_paths=set(_prefixed_paths(errors.keys(), _path_prefix)),
+                    console_width=resolved_console.width,
                 )
-                resolved_console.print(
-                    render_field_card(
-                        node=node,
-                        index=index,
-                        total=len(targets),
-                        current_path=display_path,
-                        error=errors.get(node.path),
-                        has_default=has_default,
-                        default_value=current_value,
-                    )
-                )
+                resolved_console.print(cockpit)
                 value = prompt_for_value(
                     node=node,
                     interaction=interaction,
@@ -82,6 +79,7 @@ def collect_model(
                     has_default=has_default,
                     prompt_path=display_path,
                 )
+                resolved_console.print()
                 set_nested_value(draft, node.path, value)
 
             result = validate_draft(model_type, draft)
@@ -91,7 +89,8 @@ def collect_model(
                     "Accept this form submission?", default=True
                 ):
                     path = interaction.ask(
-                        "Enter a field path to edit (blank to keep current values):", default=""
+                        "Enter a field path to edit (blank to keep current values):",
+                        default="",
                     )
                     errors = {path: "Manual edit requested"} if path else {}
                     first_pass = False
@@ -121,11 +120,49 @@ def edit_model(
     config: FormConfig | None = None,
     console: Console | None = None,
 ) -> T:
-    return collect_model(
+    warnings.warn(
+        "richforms.api.edit_model is deprecated; use richforms.api.edit instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return edit(instance, config=config, console=console)
+
+
+def edit(
+    instance: T,
+    *,
+    config: FormConfig | None = None,
+    console: Console | None = None,
+) -> T:
+    return fill(
         type(instance),
         initial=instance.model_dump(mode="python"),
         config=config,
         console=console,
+    )
+
+
+def collect_model(
+    model_type: type[T],
+    *,
+    initial: dict[str, Any] | None = None,
+    config: FormConfig | None = None,
+    console: Console | None = None,
+    _path_prefix: str = "",
+    _handle_interrupt: bool = True,
+) -> T:
+    warnings.warn(
+        "richforms.api.collect_model is deprecated; use richforms.api.fill instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return fill(
+        model_type,
+        initial=initial,
+        config=config,
+        console=console,
+        _path_prefix=_path_prefix,
+        _handle_interrupt=_handle_interrupt,
     )
 
 
@@ -136,7 +173,7 @@ def collect_dict(
     config: FormConfig | None = None,
     console: Console | None = None,
 ) -> dict[str, Any]:
-    model = collect_model(model_type, initial=initial, config=config, console=console)
+    model = fill(model_type, initial=initial, config=config, console=console)
     return model.model_dump(mode="python")
 
 

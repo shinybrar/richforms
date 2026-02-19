@@ -3,13 +3,13 @@
 ## Core entry points
 
 ```python
-from richforms import collect_model, collect_dict, edit_model, serialize_result
+from richforms import fill, edit, collect_dict, serialize_result
 ```
 
-### `collect_model`
+### `fill`
 
 ```python
-collect_model(
+fill(
     model_type,
     *,
     initial: dict | None = None,
@@ -20,10 +20,10 @@ collect_model(
 
 Returns a validated Pydantic model instance.
 
-### `edit_model`
+### `edit`
 
 ```python
-edit_model(instance, *, config=None, console=None)
+edit(instance, *, config=None, console=None)
 ```
 
 Uses an existing instance as interactive defaults.
@@ -44,3 +44,8 @@ serialize_result(model, *, format="json" | "yaml", path=None)
 
 - Returns a string when `path=None`.
 - Writes to disk and returns `None` when `path` is provided.
+
+### Deprecated aliases
+
+`collect_model` and `edit_model` remain available temporarily and emit a
+`DeprecationWarning`. Prefer `fill` and `edit`.

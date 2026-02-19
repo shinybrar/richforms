@@ -1,9 +1,6 @@
-╭───────────────────────────────────────────────────── Field 1/3 ──────────────────────────────────────────────────────╮
-│ Path: discovery.title                                                                                                │
-│ Field: title                                                                                                         │
-│ Type: str                                                                                                            │
-│ Required: yes                                                                                                        │
-│                                                                                                                      │
-│ Human-readable title of the image.                                                                                   │
-│                                                                                                                      │
-╰─────────────────────────────────────────────────────── title ────────────────────────────────────────────────────────╯
+──────────────────────────────────────────────── Field Dossier · title ─────────────────────────────────────────────────
+Path               discovery.title
+Field              title
+Required           yes
+Type               str
+Description        Human-readable title of the image.

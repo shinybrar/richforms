@@ -7,14 +7,20 @@ from richforms.render import render_field_card, render_path_radar, render_valida
 from tests.models import Metadata
 
 
+def _strip_trailing(text: str) -> str:
+    """Strip trailing whitespace from each line for stable comparison."""
+    return "\n".join(line.rstrip() for line in text.splitlines()) + "\n"
+
+
 def _render_text(renderable) -> str:
     console = Console(record=True, width=120)
     console.print(renderable)
-    return console.export_text()
+    return _strip_trailing(console.export_text())
 
 
 def _golden(name: str) -> str:
-    return (Path(__file__).parent / "golden" / f"{name}.txt").read_text(encoding="utf-8")
+    raw = (Path(__file__).parent / "golden" / f"{name}.txt").read_text(encoding="utf-8")
+    return _strip_trailing(raw)
 
 
 def test_field_card_golden() -> None:

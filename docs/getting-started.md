@@ -10,7 +10,7 @@ uv add richforms
 
 ```python
 from pydantic import BaseModel, Field
-from richforms import collect_model
+from richforms import fill
 
 
 class ImageMetadata(BaseModel):
@@ -19,7 +19,7 @@ class ImageMetadata(BaseModel):
     deprecated: bool = False
 
 
-metadata = collect_model(ImageMetadata)
+metadata = fill(ImageMetadata)
 ```
 
 ## Behavior

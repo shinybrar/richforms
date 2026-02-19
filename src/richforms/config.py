@@ -25,16 +25,19 @@ class ThemeTokens:
     verify: str = "green"
 
 
+_PROMPT_PREFIX = "[bold cyan]▸[/bold cyan]"
+
+
 class RichInteraction:
     def __init__(self, console: Console) -> None:
         self.console = console
 
     def ask(self, prompt: str, default: str | None = None) -> str:
-        value = Prompt.ask(prompt, default=default, console=self.console)
+        value = Prompt.ask(f"{_PROMPT_PREFIX} {prompt}", default=default, console=self.console)
         return value if value is not None else ""
 
     def confirm(self, prompt: str, default: bool = True) -> bool:
-        return Confirm.ask(prompt, default=default, console=self.console)
+        return Confirm.ask(f"{_PROMPT_PREFIX} {prompt}", default=default, console=self.console)
 
 
 @dataclass(slots=True)
@@ -46,3 +49,4 @@ class FormConfig:
     save_draft_on_interrupt: Literal["prompt", "always", "never"] = "prompt"
     draft_directory: Path | None = None
     interrupt_message_style: str = "yellow"
+    clear_on_step: bool = True

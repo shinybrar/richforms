@@ -1,13 +1,13 @@
-# richforms
+# Richforms
 
-`richforms` turns Pydantic models into interactive Rich terminal forms.
+`richforms` turns Pydantic data models into interactive Rich terminal forms.
 
 ## Features
 
 - Required values are explicitly prompted with type hints.
-- Defaulted values can be accepted with Enter.
-- Validation failures trigger targeted repair loops (only invalid fields re-prompt).
-- Works as a Python API and a thin CLI.
+- Defaulted values can be accepted without change.
+- Validation failures trigger targeted repair loops.
+- Works as a Python API or a thin standalone CLI.
 - Integrates with Click and Typer via callback helpers.
 
 ## Install
@@ -19,16 +19,15 @@ uv add richforms
 ## CLI
 
 ```bash
-richforms fill package.models:Metadata
-richforms edit package.models:Metadata --from-file metadata.json
-```
+# Start a new form
+richforms fill richforms.example.model:Family
 
-## Development
+# Edit an existing form
+richforms edit richforms.example.model:Family --from-file metadata.json
 
-```bash
-uv sync --dev
-uv run ruff format --check .
-uv run ruff check .
-uv run ty check .
-uv run pytest -q
+# Live cockpit redraw
+richforms fill richforms.example.model:Family --live
+
+# Force static transcript mode
+richforms fill richforms.example.model:Family --no-live
 ```

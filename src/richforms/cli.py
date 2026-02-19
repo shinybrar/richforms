@@ -7,7 +7,9 @@ from typing import Annotated, Any, Literal
 import typer
 from pydantic import BaseModel
 
-from richforms.api import collect_model, edit_model
+from richforms.api import edit as edit_form
+from richforms.api import fill as fill_form
+from richforms.config import FormConfig
 from richforms.io import load_payload_file
 from richforms.serializers import serialize_result
 
@@ -15,7 +17,7 @@ app = typer.Typer(help="Rich terminal forms powered by Pydantic models.")
 OutputFormat = Literal["json", "yaml"]
 
 
-@app.command()
+@app.command(help="Create a new form.")
 def fill(
     model: Annotated[str, typer.Argument(help="Model path as module:ModelName")],
     from_file: Annotated[
@@ -23,18 +25,23 @@ def fill(
     ] = None,
     output: Annotated[Path | None, typer.Option("--output", help="Output file path")] = None,
     format: Annotated[OutputFormat, typer.Option("--format", help="Output format")] = "json",
+    clear: Annotated[
+        bool,
+        typer.Option("--clear/--no-clear", help="Clear the terminal between each field"),
+    ] = True,
 ) -> None:
     model_type = _load_model_type(model)
     initial = load_payload_file(from_file) if from_file else None
+    config = FormConfig(clear_on_step=clear)
     try:
-        result = collect_model(model_type, initial=initial)
+        result = fill_form(model_type, initial=initial, config=config)
     except KeyboardInterrupt as exc:
         typer.echo("Form entry interrupted.", err=True)
         raise typer.Exit(code=130) from exc
     _emit_result(result=result, output=output, format=format)
 
 
-@app.command()
+@app.command(help="Edit a saved form.")
 def edit(
     model: Annotated[str, typer.Argument(help="Model path as module:ModelName")],
     from_file: Annotated[
@@ -42,12 +49,17 @@ def edit(
     ],
     output: Annotated[Path | None, typer.Option("--output", help="Output file path")] = None,
     format: Annotated[OutputFormat, typer.Option("--format", help="Output format")] = "json",
+    clear: Annotated[
+        bool,
+        typer.Option("--clear/--no-clear", help="Clear the terminal between each field"),
+    ] = True,
 ) -> None:
     model_type = _load_model_type(model)
     payload = load_payload_file(from_file)
     instance = model_type.model_validate(payload)
+    config = FormConfig(clear_on_step=clear)
     try:
-        result = edit_model(instance)
+        result = edit_form(instance, config=config)
     except KeyboardInterrupt as exc:
         typer.echo("Form entry interrupted.", err=True)
         raise typer.Exit(code=130) from exc

@@ -1,6 +1,6 @@
-# richforms
+# RichForms
 
-`richforms` generates interactive terminal forms from Pydantic models.
+`richforms` turns Pydantic data models into interactive Rich terminal forms.
 
 ## Why
 
@@ -13,16 +13,16 @@
 
 The UI is built around three persistent views:
 
-- **Path Radar**: where you are (`metadata.discovery.source`) and what remains.
-- **Field Card**: title, description, type, required/default context, examples.
-- **Validation Ledger**: only invalid paths and their latest errors.
+- **Waypoint Tree**: full nested path context with explicit state markers and legend (`→ ✓ ! · ● ○`).
+- **Field Dossier**: title, description, type, required/default context, examples.
+- **Validation Logbook**: only invalid paths and their latest errors.
 
 ## Quick example
 
 ```python
-from richforms import collect_model
+from richforms import fill
 from my_models import Metadata
 
-metadata = collect_model(Metadata)
+metadata = fill(Metadata)
 print(metadata.model_dump_json(indent=2))
 ```
