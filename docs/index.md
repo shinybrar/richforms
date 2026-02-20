@@ -1,28 +1,48 @@
-# RichForms
+---
+hide:
+  - toc
+---
 
-`richforms` turns Pydantic data models into interactive Rich terminal forms.
+# `richforms`
 
-## Why
+Turn Pydantic data models into interactive terminal forms.
 
-- Prompt required values with visible type hints.
-- Let users hit Enter to accept defaults.
-- Re-prompt only invalid fields after validation.
-- Reuse the same model contracts across Python API, CLI, and Click/Typer apps.
+---
 
-## Interface signature
+<div class="grid cards" markdown>
 
-The UI is built around three persistent views:
+-   🚀 [**Get Started**](getting-started.md)
 
-- **Waypoint Tree**: full nested path context with explicit state markers and legend (`→ ✓ ! · ● ○`).
-- **Field Dossier**: title, description, type, required/default context, examples.
-- **Validation Logbook**: only invalid paths and their latest errors.
+    ---
 
-## Quick example
+    Install `richforms`, define a model, and run your first form.
 
-```python
-from richforms import fill
-from my_models import Metadata
+-  💻 [**Use the CLI**](cli.md)
 
-metadata = fill(Metadata)
-print(metadata.model_dump_json(indent=2))
-```
+    ---
+
+    Use `richforms` to collect and update forms from the terminal.
+
+-   🐍 [**Embed in Python**](python-api.md)
+
+    ---
+
+    Call `fill`, `edit`, and `collect_dict` directly in your tools.
+
+-  🪤 [**Integrate with frameworks**](integrations.md)
+
+    ---
+
+    Plug into existing Click and Typer command options.
+
+</div>
+
+## What richforms gives you
+
+You get consistent input flows across all workflows with minimal custom code.
+
+- **Schema-first forms:** Use your existing Pydantic models as the source of
+  truth.
+- **Repair loops:** Re-prompt only fields that fail model validation.
+- **Typed prompting:** Show required state, defaults, type hints, and choices.
+- **Flexible output:** Keep values in memory or write JSON and YAML files.

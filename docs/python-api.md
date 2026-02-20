@@ -1,51 +1,88 @@
 # Python API
 
-## Core entry points
+The Python API is the right entry point when you want form collection inside
+your existing open source project commands, automation helpers, or tests.
 
-```python
-from richforms import fill, edit, collect_dict, serialize_result
+## Core imports
+
+You can import all public entry points from `richforms`.
+
+```python title="public API"
+from richforms import FormConfig, collect_dict, edit, fill, serialize_result
 ```
 
-### `fill`
+## `fill(model_type, ...)`
 
-```python
-fill(
-    model_type,
-    *,
-    initial: dict | None = None,
-    config: FormConfig | None = None,
-    console: Console | None = None,
-)
+Use `fill` to collect values for a model type and return a validated instance.
+
+```python title="collect a model instance"
+metadata = fill(ProjectMetadata)
 ```
 
-Returns a validated Pydantic model instance.
+`fill` accepts optional keyword arguments.
 
-### `edit`
+| Parameter | Description |
+| --- | --- |
+| `initial` | Optional dictionary of starting values. |
+| `config` | `FormConfig` for interaction and behavior overrides. |
+| `console` | Optional Rich `Console` instance. |
 
-```python
-edit(instance, *, config=None, console=None)
+## `edit(instance, ...)`
+
+Use `edit` to start from an existing model instance and return an updated one.
+
+```python title="edit an instance"
+updated = edit(existing_metadata)
 ```
 
-Uses an existing instance as interactive defaults.
+This is equivalent to `fill(type(instance), initial=instance.model_dump(...))`
+with internal defaults.
 
-### `collect_dict`
+## `collect_dict(model_type, ...)`
 
-```python
-collect_dict(model_type, *, initial=None, config=None, console=None)
+Use `collect_dict` when your pipeline expects a dictionary instead of a model.
+
+```python title="collect plain dict"
+payload = collect_dict(ProjectMetadata)
 ```
 
-Returns the validated model as a Python dictionary.
+The return value is `model.model_dump(mode="python")`.
 
-### `serialize_result`
+## `serialize_result(model, ...)`
 
-```python
-serialize_result(model, *, format="json" | "yaml", path=None)
+Use `serialize_result` to convert a model to JSON or YAML, with optional file
+output.
+
+```python title="serialize in memory"
+text = serialize_result(metadata, format="yaml")
 ```
 
-- Returns a string when `path=None`.
-- Writes to disk and returns `None` when `path` is provided.
+```python title="serialize to file"
+serialize_result(metadata, format="json", path=Path("metadata.json"))
+```
 
-### Deprecated aliases
+When `path` is set, the function writes to disk and returns `None`.
 
-`collect_model` and `edit_model` remain available temporarily and emit a
-`DeprecationWarning`. Prefer `fill` and `edit`.
+## FormConfig reference
+
+`FormConfig` lets you shape interaction behavior for your project.
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `confirm_before_return` | `bool` | `True` | Ask for final confirmation before returning. |
+| `save_draft_on_interrupt` | `"prompt"\|"always"\|"never"` | `"prompt"` | Control draft save behavior on keyboard interrupt. |
+| `draft_directory` | `Path \| None` | `None` | Directory for interrupt draft files. |
+| `clear_on_step` | `bool` | `True` | Clear terminal before each field on terminal consoles. |
+| `interaction` | protocol implementation | `None` | Provide custom ask/confirm behavior. |
+| `console` | `rich.console.Console` | `None` | Reuse your own console instance. |
+
+## Deprecated aliases
+
+Two API aliases remain available for compatibility and emit
+`DeprecationWarning`.
+
+- `collect_model(...)` -> use `fill(...)`
+- `edit_model(...)` -> use `edit(...)`
+
+!!! note
+    Migrate to `fill` and `edit` in new code to avoid future breaking changes.

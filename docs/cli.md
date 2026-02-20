@@ -1,52 +1,79 @@
-# CLI Guide
+# CLI guide
 
-## Fill
+The `richforms` CLI gives you a fast way to collect or update model-backed
+payloads in scripts, release workflows, and local maintainer tooling.
 
-Create a new model instance interactively:
+## Command summary
 
-```bash
-richforms fill richforms.example.model:Family
+You run the top-level command and then choose `fill` or `edit`.
+
+```bash title="list commands"
+richforms --help
 ```
 
-Seed defaults from file and write JSON output:
+| Command | Purpose | Required input |
+| --- | --- | --- |
+| `richforms fill MODEL` | Create a new payload interactively. | `MODEL` path (`module:ModelName`) |
+| `richforms edit MODEL` | Edit an existing payload interactively. | `MODEL` path and `--from-file` |
 
-```bash
-richforms fill richforms.example.model:Family \
-  --from-file metadata.json \
-  --output metadata.out.json \
-  --format json
+## Fill command
+
+Use `fill` when you need to create a new model instance from scratch or from
+partial defaults.
+
+```bash title="Create JSON output"
+richforms fill richforms.example.model:Metadata --output metadata.json
 ```
 
-## Edit
+You can pass starter values from an existing file.
 
-Load an existing payload, edit interactively, and write YAML:
-
-```bash
-richforms edit richforms.example.model:Family \
+```bash title="Seed defaults from YAML"
+richforms fill richforms.example.model:Metadata \
   --from-file metadata.yaml \
-  --output metadata.updated.yaml \
-  --format yaml
+  --output metadata.yaml
 ```
 
-## Live redraw mode
+### Fill options
 
-Interactive terminals now default to live in-place cockpit rendering.
+You can combine these options based on your workflow.
 
-Use `--no-live` to force static transcript output, or `--live` to force live mode.
-Use `--clear/--no-clear` to control static redraw behavior.
+| Option | Type | Description |
+| --- | --- | --- |
+| `--from-file` | `Path` | Optional JSON or YAML file used as initial values. |
+| `--output` | `Path` | Writes result to the target file. |
+| `--format` | `json|yaml` | Serialization format for output. Default is `json`. |
+| `--clear / --no-clear` | `bool` |Toggle terminal clear between fields. |
 
-Example forcing live mode:
+## Edit command
 
-```bash
-richforms fill richforms.example.model:Family --live --clear
+Use `edit` when you already have a valid payload and want to change it safely.
+
+```bash title="edit existing payload"
+richforms edit richforms.example.model:Metadata \
+  --from-file metadata.json \
+  --output metadata.json
 ```
 
-## Interaction sample
+### Edit options
 
-```text
-Waypoint Tree: discovery.title ✓  discovery.source >  discovery.version ✓
-Legend: → current  ✓ done  ! error  · pending  ● required  ○ optional
-Field Dossier: discovery.source (AnyUrl, required)
-Validation Logbook:
-  - discovery.source: Input should be a valid URL
-```
+The option set is similar to `fill`, but `--from-file` is required.
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `--from-file` | `PATH` | Required source JSON or YAML payload. |
+| `--output` | `PATH` | Writes result to the target file. |
+| `--format` | `json|yaml` | Serialization format for output. Default is `json`. |
+| `--clear / --no-clear` | `bool` | Toggle terminal clear between fields. |
+
+!!! warning
+    `MODEL` must be in `module:ModelName` format. If not, the command exits
+    with a parameter error.
+
+## Behavior details
+
+The CLI shares the same validation behavior as the Python API.
+
+- It prompts every leaf field during first pass.
+- It validates using the full model after each pass.
+- It re-prompts only fields that failed validation.
+- It asks for final submission confirmation before returning output.
