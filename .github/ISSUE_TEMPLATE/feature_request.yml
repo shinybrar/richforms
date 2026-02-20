@@ -1,0 +1,79 @@
+name: ✨ Feature Request
+description: Suggest a new feature or improvement for richforms.
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature!
+        Please describe the problem you're trying to solve and the solution you'd like.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: A clear description of the problem or limitation you're facing.
+      placeholder: |
+        I'm trying to ... but richforms currently doesn't support ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the behaviour or API you'd like to see.
+      placeholder: |
+        It would be great if `richforms.fill()` could accept a `...` parameter
+        that allows ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Example Usage
+      description: Show how the feature would look in practice.
+      render: python
+      placeholder: |
+        from pydantic import BaseModel
+        from richforms import fill
+
+        class Config(BaseModel):
+            name: str
+
+        # Proposed new behaviour
+        result = fill(Config, new_option=True)
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of richforms does this relate to?
+      options:
+        - Python API (fill, edit, collect_dict)
+        - CLI (richforms fill / edit)
+        - Click integration
+        - Typer integration
+        - Prompts & rendering
+        - Validation & repair loops
+        - Serialization (JSON / YAML output)
+        - Configuration (FormConfig, themes)
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative solutions or workarounds you've considered.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, mockups, or references about the feature request.
+

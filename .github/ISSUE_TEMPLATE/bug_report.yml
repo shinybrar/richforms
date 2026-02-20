@@ -1,0 +1,110 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behaviour in richforms.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug!
+        Please fill out the sections below so we can reproduce and fix the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe the bug...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Minimal steps to reproduce the behaviour.
+      placeholder: |
+        1. Define a Pydantic model with ...
+        2. Call `richforms.fill(MyModel)`
+        3. Enter value '...' for field '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behaviour
+      description: What you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behaviour
+      description: What actually happened. Include tracebacks or screenshots if applicable.
+    validations:
+      required: true
+
+  - type: textarea
+    id: mre
+    attributes:
+      label: Minimal Reproducible Example
+      description: A short, self-contained code snippet that triggers the bug.
+      render: python
+      placeholder: |
+        from pydantic import BaseModel
+        from richforms import fill
+
+        class MyModel(BaseModel):
+            name: str
+
+        result = fill(MyModel)
+
+  - type: input
+    id: richforms-version
+    attributes:
+      label: richforms version
+      description: Output of `python -c "import richforms; print(richforms.__version__)"` or `pip show richforms`.
+      placeholder: "0.2.1"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: Output of `python --version`.
+      placeholder: "3.13.0"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: e.g. macOS 15.3, Ubuntu 24.04, Windows 11
+      placeholder: "macOS 15.3"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: Installation Method
+      options:
+        - uv
+        - pip
+        - pipx
+        - conda
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, logs, or screenshots about the problem.
+
