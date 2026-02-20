@@ -7,15 +7,33 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - id: release
+        uses: googleapis/release-please-action@v4
         with:
-          # If repository settings block PR creation by GitHub Actions,
-          # set RELEASE_PLEASE_TOKEN to a PAT with repo access.
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          token: ${{ github.token }}
           config-file: .release-please-config.json
           manifest-file: .release-please-manifest.json
+      -
+        name: Dispatch PYPI Release
+        if: ${{ steps.release.outputs.release_created }}
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        with:
+          repository: shinybrar/richforms
+          event-type: pypi-release
+          token: ${{ secrets.GITHUB_TOKEN }}
+          client-payload: |-
+            {
+              "releases_created": "${{ steps.release.outputs.releases_created }}",
+              "tag_name": "${{ steps.release.outputs.tag_name }}",
+              "sha": "${{ steps.release.outputs.sha }}"
+            }
+      -
