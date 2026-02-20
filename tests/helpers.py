@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import re
+
+_ANSI_ESCAPE_RE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+
 
 class ScriptedInteraction:
     def __init__(self, responses: list[str], confirmations: list[bool] | None = None) -> None:
@@ -22,3 +26,7 @@ class ScriptedInteraction:
         if self._confirmations:
             return self._confirmations.pop(0)
         return default
+
+
+def strip_ansi(value: str) -> str:
+    return _ANSI_ESCAPE_RE.sub("", value)

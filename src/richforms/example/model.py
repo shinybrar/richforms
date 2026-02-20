@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import AnyUrl, BaseModel, Field
 
 
 class Person(BaseModel):
@@ -33,4 +33,26 @@ class Family(BaseModel):
                 }
             ]
         ],
+    )
+
+
+class Metadata(BaseModel):
+    name: str = Field(
+        ...,
+        title="Name",
+        description="Name of the project.",
+        examples=["richforms"],
+    )
+    repository: AnyUrl = Field(
+        ...,
+        title="Repository",
+        description="Repository URL",
+        examples=["https://github.com/shinybrar/richforms"],
+    )
+    license: str = Field("MIT", title="License", description="SPDX license")
+    version: str = Field(
+        ...,
+        title="Version",
+        description="Version of the project.",
+        examples=["0.1.0"],
     )
