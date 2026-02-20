@@ -5,7 +5,7 @@
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         {
-          "jsonpath": "$.package[?(@.name.value=='canfar')].version",
+          "jsonpath": "$.package[?(@.name.value=='richforms')].version",
           "path": "uv.lock",
           "type": "toml"
         }
