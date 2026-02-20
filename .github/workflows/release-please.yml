@@ -19,17 +19,18 @@ jobs:
       - id: release
         uses: googleapis/release-please-action@v4
         with:
-          token: ${{ github.token }}
+          # Some repositories require a PAT for creating GitHub releases.
+          # Fallback to github.token when RELEASE_PLEASE_TOKEN is not configured.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           config-file: .release-please-config.json
           manifest-file: .release-please-manifest.json
-      -
-        name: Dispatch PYPI Release
+      - name: Dispatch PYPI Release
         if: ${{ steps.release.outputs.release_created }}
         uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
         with:
           repository: shinybrar/richforms
           event-type: pypi-release
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           client-payload: |-
             {
               "releases_created": "${{ steps.release.outputs.releases_created }}",
