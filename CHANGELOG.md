@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/shinybrar/richforms/compare/v0.3.0...v0.4.0) (2026-02-20)
+
+
+### Features
+
+* **pypi:** updates release metadata ([51a49f2](https://github.com/shinybrar/richforms/commit/51a49f254906993dd09a77f8038830b11ffbfed5))
+* **repo:** added bug/issue templates ([0b67d66](https://github.com/shinybrar/richforms/commit/0b67d664546121b2a27a42290de51a46fc3aa8ea))
+
 ## [0.3.0](https://github.com/shinybrar/richforms/compare/v0.2.1...v0.3.0) (2026-02-20)
 
 

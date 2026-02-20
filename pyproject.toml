@@ -1,6 +1,6 @@
 [project]
 name = "richforms"
-version = "0.3.0"
+version = "0.4.0"
 description = "Turn Pydantic models into interactive Rich terminal forms — with built-in Click & Typer integrations."
 readme = "README.md"
 license = "MIT"
