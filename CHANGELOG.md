@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/shinybrar/richforms/compare/richforms-v0.2.0...richforms-v0.2.1) (2026-02-20)
+
+
+### Documentation
+
+* **zensical:** overhaul ([1d0f30c](https://github.com/shinybrar/richforms/commit/1d0f30c8630457b105630fd31d9293a6b5aed42f))
+
 ## [0.2.0](https://github.com/shinybrar/richforms/compare/richforms-v0.1.0...richforms-v0.2.0) (2026-02-19)
 
 
