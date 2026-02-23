@@ -27,6 +27,35 @@ metadata = fill(ProjectMetadata)
 | `config` | `FormConfig` for interaction and behavior overrides. |
 | `console` | Optional Rich `Console` instance. |
 
+## Exclude fields from prompts with `json_schema_extra`
+
+You can mark fields as non-interactive while keeping them in the canonical
+Pydantic model. RichForms skips excluded fields during prompt collection.
+
+```python title="exclude system-managed fields"
+from datetime import datetime
+from pydantic import BaseModel, Field
+
+
+class ReleaseMetadata(BaseModel):
+    name: str
+    version: str
+    record_id: str = Field(..., json_schema_extra={"richforms": {"exclude": True}})
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        json_schema_extra={"richforms": {"exclude": True}},
+    )
+```
+
+RichForms behavior for excluded fields is:
+
+- It doesn't prompt fields with `richforms.exclude=True`.
+- It still validates using the full Pydantic model.
+- It succeeds when excluded fields are provided through `initial`,
+  `default`, or `default_factory`.
+- It raises a RichForms error when an excluded required field remains
+  unresolved.
+
 ## `edit(instance, ...)`
 
 Use `edit` to start from an existing model instance and return an updated one.

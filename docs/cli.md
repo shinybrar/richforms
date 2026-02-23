@@ -73,7 +73,12 @@ The option set is similar to `fill`, but `--from-file` is required.
 
 The CLI shares the same validation behavior as the Python API.
 
-- It prompts every leaf field during first pass.
+- It prompts every eligible leaf field during first pass.
 - It validates using the full model after each pass.
 - It re-prompts only fields that failed validation.
 - It asks for final submission confirmation before returning output.
+
+If a field is annotated with
+`json_schema_extra={"richforms": {"exclude": True}}`, RichForms skips that
+prompt. Excluded required fields must still resolve through initial values or
+Pydantic defaults, or RichForms exits with a clear validation error.

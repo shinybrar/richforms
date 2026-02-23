@@ -11,17 +11,39 @@ from richforms.schema import MISSING, FieldNode, ModelSchema
 
 def build_model_schema(model_type: type[BaseModel]) -> ModelSchema:
     nodes: list[FieldNode] = []
-    _walk_model(model_type=model_type, prefix="", nodes=nodes)
-    return ModelSchema(model_name=model_type.__name__, leaf_nodes=nodes)
+    excluded_paths: set[str] = set()
+    _walk_model(model_type=model_type, prefix="", nodes=nodes, excluded_paths=excluded_paths)
+    return ModelSchema(
+        model_name=model_type.__name__,
+        leaf_nodes=nodes,
+        excluded_paths=excluded_paths,
+    )
 
 
-def _walk_model(model_type: type[BaseModel], prefix: str, nodes: list[FieldNode]) -> None:
+def _walk_model(
+    model_type: type[BaseModel],
+    prefix: str,
+    nodes: list[FieldNode],
+    excluded_paths: set[str],
+    *,
+    exclude_subtree: bool = False,
+) -> None:
     for name, field in model_type.model_fields.items():
         path = f"{prefix}.{name}" if prefix else name
+        should_exclude = exclude_subtree or _is_excluded(field)
         annotation = _unwrap_optional(field.annotation)
         nested = _as_model(annotation)
         if nested is not None:
-            _walk_model(nested, path, nodes)
+            _walk_model(
+                nested,
+                path,
+                nodes,
+                excluded_paths,
+                exclude_subtree=should_exclude,
+            )
+            continue
+        if should_exclude:
+            excluded_paths.add(path)
             continue
 
         has_default, default = _extract_default(field)
@@ -51,6 +73,16 @@ def _walk_model(model_type: type[BaseModel], prefix: str, nodes: list[FieldNode]
                 item_annotation=item_annotation,
             )
         )
+
+
+def _is_excluded(field: Any) -> bool:
+    metadata = field.json_schema_extra
+    if not isinstance(metadata, dict):
+        return False
+    richforms = metadata.get("richforms")
+    if not isinstance(richforms, dict):
+        return False
+    return richforms.get("exclude") is True
 
 
 def _extract_default(field: Any) -> tuple[bool, Any]:

@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from richforms import edit, fill
 from richforms.api import collect_model, edit_model
 from richforms.config import FormConfig
+from richforms.exceptions import ExcludedFieldResolutionError
 from tests.helpers import ScriptedInteraction
 from tests.models import Manifest
 
@@ -20,6 +21,28 @@ class SimpleModel(BaseModel):
 class InterruptModel(BaseModel):
     name: str
     description: str | None = None
+
+
+class ExcludedLeafPromptModel(BaseModel):
+    name: str
+    revision: int = Field(0, json_schema_extra={"richforms": {"exclude": True}})
+
+
+class ExcludedRequiredModel(BaseModel):
+    system_id: str = Field(..., json_schema_extra={"richforms": {"exclude": True}})
+
+
+class ExcludedRequiredWithInitialModel(BaseModel):
+    name: str
+    system_id: str = Field(..., json_schema_extra={"richforms": {"exclude": True}})
+
+
+class ExcludedWithDefaultFactoryModel(BaseModel):
+    name: str
+    created_at: str = Field(
+        default_factory=lambda: "2026-02-23T00:00:00Z",
+        json_schema_extra={"richforms": {"exclude": True}},
+    )
 
 
 def test_collect_model_supports_default_enter() -> None:
@@ -164,3 +187,52 @@ def test_edit_model_alias_emits_deprecation_warning() -> None:
 
     assert model.name == "Updated"
     assert any(item.category is DeprecationWarning for item in records)
+
+
+def test_fill_does_not_prompt_fields_marked_excluded() -> None:
+    interaction = ScriptedInteraction(responses=["Image"], confirmations=[True])
+    config = FormConfig(interaction=interaction)
+
+    model = fill(ExcludedLeafPromptModel, config=config)
+
+    assert model.name == "Image"
+    assert model.revision == 0
+    prompts = "\n".join(interaction.prompts)
+    assert "name" in prompts
+    assert "revision" not in prompts
+
+
+def test_fill_raises_clear_error_for_unresolved_excluded_required_field() -> None:
+    interaction = ScriptedInteraction(responses=[], confirmations=[])
+    config = FormConfig(interaction=interaction)
+
+    with pytest.raises(ExcludedFieldResolutionError, match="system_id"):
+        fill(ExcludedRequiredModel, config=config)
+
+
+def test_fill_allows_excluded_required_field_with_initial_value() -> None:
+    interaction = ScriptedInteraction(responses=["Widget"], confirmations=[True])
+    config = FormConfig(interaction=interaction)
+
+    model = fill(
+        ExcludedRequiredWithInitialModel,
+        initial={"system_id": "sys-1234"},
+        config=config,
+    )
+
+    assert model.name == "Widget"
+    assert model.system_id == "sys-1234"
+    prompts = "\n".join(interaction.prompts)
+    assert "system_id" not in prompts
+
+
+def test_fill_allows_excluded_field_with_default_factory() -> None:
+    interaction = ScriptedInteraction(responses=["Widget"], confirmations=[True])
+    config = FormConfig(interaction=interaction)
+
+    model = fill(ExcludedWithDefaultFactoryModel, config=config)
+
+    assert model.name == "Widget"
+    assert model.created_at == "2026-02-23T00:00:00Z"
+    prompts = "\n".join(interaction.prompts)
+    assert "created_at" not in prompts

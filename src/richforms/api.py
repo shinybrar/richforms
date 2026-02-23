@@ -9,6 +9,7 @@ from rich.console import Console
 
 from richforms.config import FormConfig, Interaction, RichInteraction
 from richforms.drafts import build_draft_path, save_draft_yaml
+from richforms.exceptions import ExcludedFieldResolutionError
 from richforms.introspection import build_model_schema
 from richforms.prompts import prompt_for_value
 from richforms.render import (
@@ -96,6 +97,10 @@ def fill(
                     first_pass = False
                     continue
                 return cast(T, result.model)
+
+            excluded_errors = _excluded_errors(result.errors, schema)
+            if excluded_errors:
+                raise ExcludedFieldResolutionError(excluded_errors)
 
             errors = _normalize_errors(result.errors, schema)
             resolved_console.print(
@@ -216,6 +221,22 @@ def _normalize_errors(errors: dict[str, str], schema: ModelSchema) -> dict[str, 
                 normalized[known] = message
                 break
     return normalized
+
+
+def _excluded_errors(errors: dict[str, str], schema: ModelSchema) -> dict[str, str]:
+    if not errors or not schema.excluded_paths:
+        return {}
+    return {
+        path: message
+        for path, message in errors.items()
+        if _matches_excluded_path(path, schema.excluded_paths)
+    }
+
+
+def _matches_excluded_path(path: str, excluded_paths: set[str]) -> bool:
+    if path in excluded_paths:
+        return True
+    return any(excluded.startswith(path + ".") for excluded in excluded_paths)
 
 
 def _completed_paths(schema: ModelSchema, draft: dict[str, Any]) -> list[str]:
