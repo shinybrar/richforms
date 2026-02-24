@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.5.0](https://github.com/shinybrar/richforms/compare/v0.4.0...v0.5.0) (2026-02-24)
+
+
+### Features
+
+* **prompts:** support richforms.exclude field exclusion ([47bd3d7](https://github.com/shinybrar/richforms/commit/47bd3d7891cf45144663841986e8b619da65bda2))
+* **prompts:** support richforms.exclude field exclusion ([f2b22dc](https://github.com/shinybrar/richforms/commit/f2b22dc458cbc0fd93b5f00b4078ce79c03cfe06))
+
+
+### Bug Fixes
+
+* **lint:** files ([b9e53cc](https://github.com/shinybrar/richforms/commit/b9e53cccea160f3a8761c4b23058438caa31870d))
+
+
+### Documentation
+
+* **examples:** added cli example for exclusion ([fd33c64](https://github.com/shinybrar/richforms/commit/fd33c644ea6cbdd5bea526032e1b21778875157b))
+
 ## [0.4.0](https://github.com/shinybrar/richforms/compare/v0.3.0...v0.4.0) (2026-02-20)
 
 
