@@ -77,7 +77,6 @@ def render_field_card(
     default_value: object | None = None,
 ) -> Group:
     field_label = node.title or node.name
-    optional_hint = "Press Enter to skip."
     table = Table.grid(padding=(0, 1))
     table.add_column(style="bold grey70", no_wrap=True, width=18)
     table.add_column(ratio=1)
@@ -85,10 +84,6 @@ def render_field_card(
     table.add_row("Field", field_label)
     table.add_row("Required", "yes" if node.required else "no")
     table.add_row("Type", _code_label(node.type_label))
-    if has_default:
-        table.add_row("Default", repr(default_value))
-    if not node.required:
-        table.add_row("Optional", optional_hint)
     if node.description:
         table.add_row("Description", node.description)
     if node.examples:

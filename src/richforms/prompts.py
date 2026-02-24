@@ -71,12 +71,13 @@ def _prompt_for_list(
         )
 
     if has_default:
-        decision = interaction.ask(
-            f"{prompt_path} (Enter to keep, any key to edit)",
-            default="",
-        )
-        if decision == "":
-            return list(default_value)
+        decision_prompt = _default_edit_prompt(prompt_path=prompt_path, default_value=default_value)
+        while True:
+            decision = interaction.ask(decision_prompt, default="")
+            if decision == "":
+                return list(default_value)
+            if decision == "e":
+                break
 
     item_adapter = TypeAdapter(item_annotation)
     values: list[Any] = []
@@ -180,6 +181,13 @@ def _default_to_text(value: Any) -> str:
     if isinstance(value, list):
         return ",".join(str(item) for item in value)
     return str(value)
+
+
+def _default_edit_prompt(*, prompt_path: str, default_value: Any) -> str:
+    return (
+        f"{prompt_path} [bold]Default:[/bold] {repr(default_value)}: "
+        "[bold yellow]e[/bold yellow] to edit, [bold]↵[/bold] to continue"
+    )
 
 
 def _as_model(annotation: Any) -> type[BaseModel] | None:
