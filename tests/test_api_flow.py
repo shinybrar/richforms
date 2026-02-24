@@ -2,7 +2,7 @@ import warnings
 from pathlib import Path
 
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import AnyUrl, BaseModel, Field
 
 from richforms import edit, fill
 from richforms.api import collect_model, edit_model
@@ -18,9 +18,23 @@ class SimpleModel(BaseModel):
     version: str = "1.0.0"
 
 
+class OptionalUrlModel(BaseModel):
+    name: str
+    source: AnyUrl
+    url: AnyUrl | None = None
+
+
 class InterruptModel(BaseModel):
     name: str
     description: str | None = None
+
+
+class PromptDefaultInteraction(ScriptedInteraction):
+    def ask(self, prompt: str, default: str | None = None) -> str:
+        value = super().ask(prompt, default=default)
+        if value == "" and default is not None:
+            return default
+        return value
 
 
 class ExcludedLeafPromptModel(BaseModel):
@@ -61,6 +75,22 @@ def test_collect_model_supports_default_enter() -> None:
     assert model.name == "Image"
     assert model.source == "https://example.com/repo"
     assert model.version == "1.0.0"
+
+
+def test_fill_optional_anyurl_accepts_enter_with_none_default() -> None:
+    interaction = PromptDefaultInteraction(
+        responses=[
+            "Image",
+            "https://example.com/repo",
+            "",
+        ],
+        confirmations=[True],
+    )
+    config = FormConfig(interaction=interaction)
+
+    model = fill(OptionalUrlModel, config=config)
+
+    assert model.url is None
 
 
 def test_collect_model_reprompts_only_invalid_field_after_validation() -> None:
