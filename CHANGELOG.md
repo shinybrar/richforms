@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/shinybrar/richforms/compare/v0.5.1...v0.6.0) (2026-02-24)
+
+
+### Features
+
+* improve default option prompt UX and key handling ([b223eaf](https://github.com/shinybrar/richforms/commit/b223eaf6dc78f5542b7cc820960137c560a5aba3))
+* **prompts:** improve default prompt UX and edit flow ([99def7d](https://github.com/shinybrar/richforms/commit/99def7d3f5a6620a110260c652b0855880e49e9f))
+
 ## [0.5.1](https://github.com/shinybrar/richforms/compare/v0.5.0...v0.5.1) (2026-02-24)
 
 
