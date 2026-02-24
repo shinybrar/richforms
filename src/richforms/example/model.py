@@ -56,3 +56,26 @@ class Metadata(BaseModel):
         description="Version of the project.",
         examples=["0.1.0"],
     )
+
+
+class ExcludedFieldExample(BaseModel):
+    name: str = Field(
+        ...,
+        description="Human-readable name for the release payload.",
+        examples=["Release Metadata"],
+    )
+    version: str = Field(
+        ...,
+        description="Release version entered by the operator.",
+        examples=["1.2.3"],
+    )
+    revision: int = Field(
+        1,
+        description="System-managed revision number.",
+        json_schema_extra={"richforms": {"exclude": True}},
+    )
+    system_owner: str = Field(
+        "release-bot",
+        description="System-managed owner marker.",
+        json_schema_extra={"richforms": {"exclude": True}},
+    )

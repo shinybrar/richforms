@@ -73,7 +73,42 @@ The option set is similar to `fill`, but `--from-file` is required.
 
 The CLI shares the same validation behavior as the Python API.
 
-- It prompts every leaf field during first pass.
+- It prompts every eligible leaf field during first pass.
 - It validates using the full model after each pass.
 - It re-prompts only fields that failed validation.
 - It asks for final submission confirmation before returning output.
+
+If a field is annotated with
+`json_schema_extra={"richforms": {"exclude": True}}`, RichForms skips that
+prompt. Excluded required fields must still resolve through initial values or
+Pydantic defaults, or RichForms exits with a clear validation error.
+
+## CLI walkthrough for excluded fields
+
+You can use the bundled `ExcludedFieldExample` model to see excluded prompt
+fields in action.
+
+1. Run `fill` with the example model.
+
+```bash title="collect payload with excluded fields"
+richforms fill richforms.example.model:ExcludedFieldExample --output excluded-example.json
+```
+
+2. Enter values for only the prompted fields.
+
+```text title="prompt flow"
+name: Release Metadata
+version: 1.2.3
+```
+
+3. Review the output file. RichForms keeps excluded fields on the model, but
+   it never prompts for them.
+
+```json title="excluded-example.json"
+{
+  "name": "Release Metadata",
+  "version": "1.2.3",
+  "revision": 1,
+  "system_owner": "release-bot"
+}
+```

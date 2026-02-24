@@ -107,4 +107,3 @@ body:
     attributes:
       label: Additional Context
       description: Any other context, logs, or screenshots about the problem.
-

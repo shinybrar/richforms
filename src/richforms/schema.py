@@ -27,6 +27,7 @@ class FieldNode:
 class ModelSchema:
     model_name: str
     leaf_nodes: list[FieldNode]
+    excluded_paths: set[str] = field(default_factory=set)
 
     @property
     def by_path(self) -> dict[str, FieldNode]:
