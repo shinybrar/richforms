@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.1](https://github.com/shinybrar/richforms/compare/v0.5.0...v0.5.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* allow Enter skip for optional AnyUrl None defaults ([be22cc0](https://github.com/shinybrar/richforms/commit/be22cc02b3aec897100943804f19e7c5abeef51e))
+* **prompts:** handle optional None defaults correctly ([0a6c8d9](https://github.com/shinybrar/richforms/commit/0a6c8d932dc2273f5da3d2937032d1fdb5984e22))
+
 ## [0.5.0](https://github.com/shinybrar/richforms/compare/v0.4.0...v0.5.0) (2026-02-24)
 
 
