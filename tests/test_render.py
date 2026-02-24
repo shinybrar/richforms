@@ -20,7 +20,7 @@ def test_render_field_card_includes_metadata() -> None:
     assert "Human-readable title of the image." in output
 
 
-def test_render_field_card_uses_human_field_label_and_optional_hint() -> None:
+def test_render_field_card_uses_human_field_label() -> None:
     schema = build_model_schema(Manifest)
     node = schema.by_path["maintainers"]
     console = Console(record=True, width=120)
@@ -34,16 +34,24 @@ def test_render_field_card_uses_human_field_label_and_optional_hint() -> None:
     assert "Maintainers" in output
 
 
-def test_render_field_card_shows_optional_skip_hint() -> None:
+def test_render_field_card_hides_optional_and_default_rows() -> None:
     schema = build_model_schema(Manifest)
     node = schema.by_path["version"]
     console = Console(record=True, width=120)
 
-    panel = render_field_card(node=node, index=1, total=2, current_path="manifest.version")
+    panel = render_field_card(
+        node=node,
+        index=1,
+        total=2,
+        current_path="manifest.version",
+        has_default=True,
+        default_value=1,
+    )
     console.print(panel)
     output = console.export_text()
 
-    assert "Press Enter to skip." in output
+    assert "Optional" not in output
+    assert "Default" not in output
 
 
 def test_render_path_radar_shows_active_arrow_and_required_optional_markers() -> None:
