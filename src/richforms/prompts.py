@@ -34,7 +34,9 @@ def prompt_for_value(
         )
 
     while True:
-        default_text = _default_to_text(default_value) if has_default else None
+        default_text = None
+        if has_default and not (default_value is None and not node.required):
+            default_text = _default_to_text(default_value)
         prompt = prompt_path
         if has_default and not node.required:
             prompt = f"{prompt_path} (Press Enter to keep current value, '-' to clear.)"
