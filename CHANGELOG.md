@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/shinybrar/richforms/compare/v0.6.0...v0.7.0) (2026-02-27)
+
+
+### Features
+
+* **ux:** streamline list entry and CLI form ergonomics ([58b25a3](https://github.com/shinybrar/richforms/commit/58b25a3657ef568e5d17efba2fa5f5d7817c9e6d))
+
+
+### Bug Fixes
+
+* **ci:** resolve formatting and missing AnyUrl import ([20eae93](https://github.com/shinybrar/richforms/commit/20eae93f6734a0ebeb6b4da68dcca955634afb00))
+
 ## [0.6.0](https://github.com/shinybrar/richforms/compare/v0.5.1...v0.6.0) (2026-02-24)
 
 
