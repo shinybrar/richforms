@@ -41,8 +41,8 @@ You can combine these options based on your workflow.
 | --- | --- | --- |
 | `--from-file` | `Path` | Optional JSON or YAML file used as initial values. |
 | `--output` | `Path` | Writes result to the target file. |
-| `--format` | `json|yaml` | Serialization format for output. Default is `json`. |
-| `--clear / --no-clear` | `bool` |Toggle terminal clear between fields. |
+| `--format` | `json|yaml` | Serialization format for output. Defaults to output file extension when recognized (`.json`, `.yaml`, `.yml`), otherwise `json`. |
+| `--clear / --no-clear` | `bool` | Toggle terminal clear between fields. |
 
 ## Edit command
 
@@ -62,7 +62,7 @@ The option set is similar to `fill`, but `--from-file` is required.
 | --- | --- | --- |
 | `--from-file` | `PATH` | Required source JSON or YAML payload. |
 | `--output` | `PATH` | Writes result to the target file. |
-| `--format` | `json|yaml` | Serialization format for output. Default is `json`. |
+| `--format` | `json|yaml` | Serialization format for output. Defaults to output file extension when recognized (`.json`, `.yaml`, `.yml`), otherwise `json`. |
 | `--clear / --no-clear` | `bool` | Toggle terminal clear between fields. |
 
 !!! warning
@@ -77,6 +77,10 @@ The CLI shares the same validation behavior as the Python API.
 - It validates using the full model after each pass.
 - It re-prompts only fields that failed validation.
 - It asks for final submission confirmation before returning output.
+- For optional fields with existing values, pressing Enter keeps the value and typing `-` clears it.
+- For list fields with existing values, press Enter to keep, press `e` to edit, or press `-` to clear (single-key input on terminal sessions).
+- While entering scalar list items, keep typing values; press `↵` to finish or press `-` to reset the current list edit session.
+- If `--format` conflicts with `--output` suffix, RichForms writes the requested format and prints a warning.
 
 If a field is annotated with
 `json_schema_extra={"richforms": {"exclude": True}}`, RichForms skips that

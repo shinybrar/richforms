@@ -9,6 +9,9 @@ from rich.console import Console
 from richforms.config import FormConfig, Interaction
 from richforms.schema import FieldNode
 
+_CLEAR_TOKENS = {"-", "null", "none"}
+_LIST_ITEM_PROMPT_HINT = "(↵ to finish, - to reset)"
+
 
 def prompt_for_value(
     *,
@@ -35,12 +38,19 @@ def prompt_for_value(
         if has_default and not (default_value is None and not node.required):
             default_text = _default_to_text(default_value)
         prompt = prompt_path
-        if not node.required:
+        if has_default and not node.required:
+            prompt = f"{prompt_path} (Press Enter to keep current value, '-' to clear.)"
+        elif not node.required:
             prompt = f"{prompt_path} ({optional_hint})"
         raw = interaction.ask(prompt, default=default_text)
         if raw == "" and has_default:
             return default_value
         if raw == "" and not node.required:
+            return None
+        if _is_clear_token(raw):
+            if node.required:
+                console.print(f"[red]{prompt_path} is required and cannot be cleared.[/red]")
+                continue
             return None
         try:
             return _parse_value(node=node, raw=raw)
@@ -58,7 +68,6 @@ def _prompt_for_list(
     has_default: bool,
     prompt_path: str,
 ) -> list[Any]:
-    optional_hint = "Press Enter to continue without a value."
     item_annotation = node.item_annotation or str
     item_model = _as_model(item_annotation)
     if item_model is not None:
@@ -75,30 +84,41 @@ def _prompt_for_list(
     if has_default:
         decision_prompt = _default_edit_prompt(prompt_path=prompt_path, default_value=default_value)
         while True:
-            decision = interaction.ask(decision_prompt, default="")
-            if decision == "":
+            normalized = interaction.choose(
+                decision_prompt,
+                choices={"e", "-"},
+                default="",
+            )
+            if normalized == "":
                 return list(default_value)
-            if decision == "e":
+            if normalized == "e":
                 break
+            if _is_clear_token(normalized):
+                return []
+            console.print(
+                "[red]Choose one: press Enter to keep, type 'e' to edit, or '-' to clear.[/red]"
+            )
 
     item_adapter = TypeAdapter(item_annotation)
     values: list[Any] = []
     index = 1
     while True:
-        prompt = f"{prompt_path}[{index}]"
-        if not node.required and not has_default and index == 1:
-            prompt = f"{prompt} ({optional_hint})"
+        prompt = f"{prompt_path}[{index}] {_LIST_ITEM_PROMPT_HINT}"
         raw = interaction.ask(prompt)
-        if raw == "" and not node.required and not has_default and index == 1:
-            return []
+        if _is_clear_token(raw):
+            values = []
+            index = 1
+            continue
+        if raw == "":
+            if index == 1:
+                return []
+            break
         try:
             values.append(item_adapter.validate_python(raw))
         except ValidationError as exc:
             message = f"Invalid value for {prompt_path}: {exc.errors()[0]['msg']}"
             console.print(f"[red]{message}[/red]")
             continue
-        if not interaction.confirm(f"Add another item for {prompt_path}?", default=False):
-            break
         index += 1
     return values
 
@@ -114,8 +134,23 @@ def _prompt_for_model_list(
     item_model: type[BaseModel],
 ) -> list[Any]:
     existing = list(default_value) if has_default and isinstance(default_value, list) else []
-    if existing and interaction.confirm(f"Use existing values for {prompt_path}?", default=True):
-        return existing
+    if existing:
+        decision_prompt = _default_edit_prompt(prompt_path=prompt_path, default_value=default_value)
+        while True:
+            normalized = interaction.choose(
+                decision_prompt,
+                choices={"e", "-"},
+                default="",
+            )
+            if normalized == "":
+                return existing
+            if normalized == "e":
+                break
+            if _is_clear_token(normalized):
+                return []
+            console.print(
+                "[red]Choose one: press Enter to keep, type 'e' to edit, or '-' to clear.[/red]"
+            )
 
     values: list[Any] = []
     collect_first = bool(node.required and not existing)
@@ -148,8 +183,6 @@ def _prompt_for_model_list(
 
     if values:
         return values
-    if existing:
-        return existing
     return []
 
 
@@ -188,7 +221,8 @@ def _default_to_text(value: Any) -> str:
 def _default_edit_prompt(*, prompt_path: str, default_value: Any) -> str:
     return (
         f"{prompt_path} [bold]Default:[/bold] {repr(default_value)}: "
-        "[bold yellow]e[/bold yellow] to edit, [bold]↵[/bold] to continue"
+        "[bold yellow]e[/bold yellow] to edit, [bold red]-[/bold red] to clear, "
+        "[bold]↵[/bold] to continue"
     )
 
 
@@ -196,3 +230,7 @@ def _as_model(annotation: Any) -> type[BaseModel] | None:
     if inspect.isclass(annotation) and issubclass(annotation, BaseModel):
         return annotation
     return None
+
+
+def _is_clear_token(raw: str) -> bool:
+    return raw.strip().lower() in _CLEAR_TOKENS

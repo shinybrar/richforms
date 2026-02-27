@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 from pydantic import AnyUrl, BaseModel, Field
+from rich.console import Console
 
 from richforms import edit, fill
 from richforms.api import collect_model, edit_model
@@ -27,6 +28,22 @@ class OptionalUrlModel(BaseModel):
 class InterruptModel(BaseModel):
     name: str
     description: str | None = None
+
+
+class OptionalDefaultModel(BaseModel):
+    note: str | None = "keep-me"
+
+
+class OptionalListModel(BaseModel):
+    tags: list[str] = Field(default_factory=list)
+
+
+class ItemModel(BaseModel):
+    name: str
+
+
+class ModelListEditModel(BaseModel):
+    items: list[ItemModel] = Field(default_factory=list)
 
 
 class PromptDefaultInteraction(ScriptedInteraction):
@@ -185,6 +202,59 @@ def test_edit_updates_existing_model_values() -> None:
 
     assert model.name == "New Name"
     assert model.source == "https://example.com/repo"
+
+
+def test_edit_allows_clearing_optional_prefilled_value() -> None:
+    interaction = ScriptedInteraction(responses=["-"], confirmations=[True])
+    config = FormConfig(interaction=interaction)
+    instance = OptionalDefaultModel(note="existing")
+
+    model = edit(instance, config=config)
+
+    assert model.note is None
+
+
+def test_edit_list_default_edit_mode_allows_blank_to_clear_list() -> None:
+    interaction = ScriptedInteraction(responses=["e", ""], confirmations=[True])
+    config = FormConfig(interaction=interaction)
+    instance = OptionalListModel(tags=["linux/amd64"])
+
+    model = edit(instance, config=config)
+
+    assert model.tags == []
+
+
+def test_edit_model_list_can_replace_existing_with_empty_list() -> None:
+    interaction = ScriptedInteraction(responses=["e"], confirmations=[False, True])
+    config = FormConfig(interaction=interaction)
+    instance = ModelListEditModel(items=[ItemModel(name="Alice")])
+
+    model = edit(instance, config=config)
+
+    assert model.items == []
+
+
+def test_fill_reprompts_when_manual_edit_path_is_invalid() -> None:
+    interaction = ScriptedInteraction(
+        responses=[
+            "Image",
+            "https://example.com/repo",
+            "",
+            "sorce",
+            "source",
+            "https://example.com/new-repo",
+        ],
+        confirmations=[False, True],
+    )
+    console = Console(record=True)
+    config = FormConfig(interaction=interaction, console=console, clear_on_step=False)
+
+    model = fill(SimpleModel, config=config)
+
+    assert model.source == "https://example.com/new-repo"
+    prompt = "Enter a field path to edit (blank to keep current values):"
+    assert interaction.prompts.count(prompt) == 2
+    assert "Did you mean: source?" in console.export_text()
 
 
 def test_collect_model_alias_emits_deprecation_warning() -> None:
