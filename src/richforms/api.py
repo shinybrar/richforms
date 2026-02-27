@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import warnings
 from collections.abc import Iterable
+from difflib import get_close_matches
 from typing import Any, TypeVar, cast
 
 from pydantic import BaseModel
@@ -89,11 +90,11 @@ def fill(
                 if cfg.confirm_before_return and not interaction.confirm(
                     "Accept this form submission?", default=True
                 ):
-                    path = interaction.ask(
-                        "Enter a field path to edit (blank to keep current values):",
-                        default="",
+                    errors = _collect_manual_edit_request(
+                        interaction=interaction,
+                        console=resolved_console,
+                        schema=schema,
                     )
-                    errors = {path: "Manual edit requested"} if path else {}
                     first_pass = False
                     continue
                 return cast(T, result.model)
@@ -255,6 +256,40 @@ def _prefixed_paths(paths: Iterable[str], prefix: str) -> list[str]:
 
 def _prefixed_error_map(errors: dict[str, str], prefix: str) -> dict[str, str]:
     return {_display_path(path, prefix): message for path, message in errors.items()}
+
+
+def _collect_manual_edit_request(
+    *,
+    interaction: Interaction,
+    console: Console,
+    schema: ModelSchema,
+) -> dict[str, str]:
+    while True:
+        path = interaction.ask(
+            "Enter a field path to edit (blank to keep current values):",
+            default="",
+        ).strip()
+        if not path:
+            return {}
+
+        targets = _manual_edit_targets(path=path, schema=schema)
+        if targets:
+            return dict.fromkeys(targets, "Manual edit requested")
+
+        suggestions = _suggest_paths(path=path, schema=schema)
+        suggestion_hint = f" Did you mean: {', '.join(suggestions)}?" if suggestions else ""
+        console.print(f"[red]Unknown field path '{path}'.{suggestion_hint}[/red]")
+
+
+def _manual_edit_targets(*, path: str, schema: ModelSchema) -> list[str]:
+    if path in schema.by_path:
+        return [path]
+    prefix = f"{path}."
+    return [node.path for node in schema.leaf_nodes if node.path.startswith(prefix)]
+
+
+def _suggest_paths(*, path: str, schema: ModelSchema) -> list[str]:
+    return get_close_matches(path, schema.by_path.keys(), n=3, cutoff=0.6)
 
 
 def _handle_keyboard_interrupt(
