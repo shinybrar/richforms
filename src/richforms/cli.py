@@ -97,9 +97,7 @@ def main() -> None:
     app()
 
 
-def _emit_result(
-    *, result: BaseModel, output: Path | None, format: OutputFormat | None
-) -> None:
+def _emit_result(*, result: BaseModel, output: Path | None, format: OutputFormat | None) -> None:
     resolved_format = _resolve_output_format(output=output, format=format)
     if (
         output is not None

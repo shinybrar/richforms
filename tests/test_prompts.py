@@ -153,9 +153,7 @@ def test_prompt_for_list_item_hint_shows_finish_and_reset() -> None:
 
 
 def test_prompt_for_list_dash_resets_current_edit_session() -> None:
-    interaction = ScriptedInteraction(
-        responses=["e", "linux/arm64", "-", "linux/amd64", ""]
-    )
+    interaction = ScriptedInteraction(responses=["e", "linux/arm64", "-", "linux/amd64", ""])
     node = _list_node()
 
     value = prompt_for_value(

@@ -2,7 +2,7 @@ import warnings
 from pathlib import Path
 
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import AnyUrl, BaseModel, Field
 from rich.console import Console
 
 from richforms import edit, fill
@@ -44,6 +44,8 @@ class ItemModel(BaseModel):
 
 class ModelListEditModel(BaseModel):
     items: list[ItemModel] = Field(default_factory=list)
+
+
 class PromptDefaultInteraction(ScriptedInteraction):
     def ask(self, prompt: str, default: str | None = None) -> str:
         value = super().ask(prompt, default=default)
